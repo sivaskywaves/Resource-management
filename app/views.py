@@ -102,7 +102,25 @@ class ProjectView(APIView):
                 'equipment_ids': equipment_ids,
                 'equipment_quantities': equipment_quantities
             })
-        return Response(data)    
+        return Response(data)   
+    def get(self, request,pk):
+        project = Project.objects.get(pk=pk)
+        data = []
+        labour_ids = project.labour_ids.split(',')
+        material_ids = project.material_ids.split(',')
+        material_quantities = project.material_quantities.split(',')
+        equipment_ids = project.equipment_ids.split(',')
+        equipment_quantities = project.equipment_quantities.split(',')
+        data.append({
+                'project_id':project.id,
+                'project_name': project.name,
+                'labour_ids': labour_ids,
+                'material_ids': material_ids,
+                'material_quantities': material_quantities,
+                'equipment_ids': equipment_ids,
+                'equipment_quantities': equipment_quantities
+            })
+        return Response(data) 
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
@@ -116,7 +134,7 @@ class ProjectView(APIView):
             for labour_id in labour_ids:
                 labour = Labour.objects.get(id=int(labour_id))
                 ResourceUsage.objects.create(project=project, labour=labour, usage_date=date.today(),resource_type='labour')
-                # labour.delete()
+                labour.delete()
             for i in range(len(material_ids)):
                 material_id = material_ids[i]
                 material_quantity = material_quantities[i]
