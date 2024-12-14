@@ -157,7 +157,7 @@ class ProjectView(APIView):
                 labour = Labour.objects.get(id=int(labour_id))
                 labour.allocated(True)
                 ResourceUsage.objects.create(project=project, labour=labour, usage_date=date.today(),resource_type='labour')
-                # labour.delete()
+                labour.delete()
             for i in range(len(material_ids)):
                 material_id = material_ids[i]
                 material_quantity = material_quantities[i]
