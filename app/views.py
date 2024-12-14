@@ -107,7 +107,6 @@ class ProjectView(APIView):
                 material_id = material_ids[i]
                 material_quantity = material_quantities[i]
                 material = Material.objects.get(id=int(material_id))
-                material.quantity >= material_quantity
                 material.quantity -= int(material_quantity)
                 material.save()
                 ResourceUsage.objects.create(project=project, material=material, usage_quantity=int(material_quantity), usage_date=date.today(), resource_type='material')
