@@ -120,7 +120,7 @@ class ProjectView(APIView):
                 'equipment_quantities': equipment_quantities
             })
         return Response(data)   
-    def get(self, request,pk):
+    def get_project(self, request,pk):
         project = Project.objects.get(pk=pk)
         data = []
         labour_ids = project.labour_ids.split(',')
@@ -215,4 +215,22 @@ class ResourceUsageView(APIView):
         resource_usage = ResourceUsage.objects.filter(project_id=project_id)
         serializer = ResourceUsageSerializer(resource_usage, many=True)
         return Response(serializer.data)
-    
+class GetProjectView(APIView):
+    def get(self, request):
+        projects = Project.objects.all()
+        data = []
+        for project in projects:
+            labour_ids = project.labour_ids.split(',')
+            material_ids = project.material_ids.split(',')
+            material_quantities = project.material_quantities.split(',')
+            equipment_ids = project.equipment_ids.split(',')
+            equipment_quantities = project.equipment_quantities.split(',')
+            data.append({
+                'project_name': project.name,
+                'labour_ids': labour_ids,
+                'material_ids': material_ids,
+                'material_quantities': material_quantities,
+                'equipment_ids': equipment_ids,
+                'equipment_quantities': equipment_quantities
+            })
+        return Response(data)  

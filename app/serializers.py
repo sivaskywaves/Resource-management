@@ -1,19 +1,5 @@
 from rest_framework import serializers
 from .models import *
-
-class ProjectSerializer(serializers.ModelSerializer):
-    labour_ids = serializers.ListField(child=serializers.IntegerField())
-    material_id = serializers.ListField(child=serializers.IntegerField())
-    material_quantity = serializers.ListField(child=serializers.IntegerField())
-    equipment_id = serializers.ListField(child=serializers.IntegerField())
-    equipment_quantity = serializers.ListField(child=serializers.IntegerField())
-
-    class Meta:
-        model = Project
-        fields = ['id', 'name', 'labour_ids', 'material_id', 'material_quantity', 'equipment_id', 'equipment_quantity']   
- 
-    
-
 class LabourSerializer(serializers.ModelSerializer):
     class Meta:
         model = Labour
