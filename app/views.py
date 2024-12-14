@@ -11,6 +11,13 @@ class LabourView(APIView):
         labours = Labour.objects.all()
         serializer = LabourSerializer(labours, many=True)
         return Response(serializer.data)
+    def get(self, request, pk):
+     try:
+        labour = Labour.objects.get(pk=pk)
+        serializer = LabourSerializer(labour)
+        return Response(serializer.data)
+     except Equipment.DoesNotExist:
+      return Response(status=status.HTTP_404_NOT_FOUND)
     def post(self, request):
         serializer = LabourSerializer(data=request.data)
         if serializer.is_valid():
@@ -24,16 +31,11 @@ class LabourView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        labour = Labour.objects.get(pk=pk)
-        labour.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
     def delete(self, request, pk):
         try:
          labour = Labour.objects.get(pk=pk)
-         serializer=LabourSerializer(labour,many=True)
-         return Response(serializer.data)
+         labour.delete()
+         return Response("Deleted Succesfully")
         except:
          return Response(status=status.HTTP_204_NO_CONTENT)
 class EquipmentView(APIView):
@@ -60,6 +62,14 @@ class EquipmentView(APIView):
         equipments = Equipment.objects.get(pk=pk)
         equipments.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    def get(self, request, pk):
+     try:
+        equipment = Equipment.objects.get(pk=pk)
+        serializer = EquipmentSerializer(equipment)
+        return Response(serializer.data)
+     except Equipment.DoesNotExist:
+      return Response(status=status.HTTP_404_NOT_FOUND)
+
 class MaterialView(APIView):
 
     def post(self,request):
@@ -83,6 +93,13 @@ class MaterialView(APIView):
         materials = Material.objects.get(pk=pk)
         materials.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    def get(self, request, pk):
+     try:
+        material = Material.objects.get(pk=pk)
+        serializer = MaterialSerializer(material)
+        return Response(serializer.data)
+     except Equipment.DoesNotExist:
+      return Response(status=status.HTTP_404_NOT_FOUND)
 
 class ProjectView(APIView):
     def get(self, request):
