@@ -1,9 +1,10 @@
 
 from rest_framework import status
 from rest_framework.response import Response
+from datetime import date
 from rest_framework.views import APIView
-from .models import Project, Labour, Material, Equipment
-from .serializers import ProjectSerializer,LabourSerializer,MaterialSerializer,EquipmentSerializer
+from .models import Project, Labour, Material, Equipment,ResourceUsage
+from .serializers import ProjectSerializer,LabourSerializer,MaterialSerializer,EquipmentSerializer,ResourceUsageSerializer
 
 class LabourView(APIView):
     def get(self, request):
@@ -84,73 +85,86 @@ class MaterialView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProjectView(APIView):
-    def get(self, request):
-        projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
-        return Response(serializer.data)
- 
+    # def get(self, request):
+    #     projects = Project.objects.all()
+    #     serializer = ProjectSerializer(projects, many=True)
+        # return Response(serializer.data)    
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            
             labour_ids = request.data['labour_ids']
-            material_id = request.data['material_id']
-            material_quantity = request.data['material_quantity']
-            equipment_id = request.data['equipment_id']
-            equipment_quantity = request.data['equipment_quantity']
-
+            material_ids = request.data['material_ids']
+            material_quantities = request.data['material_quantities']
+            equipment_ids = request.data['equipment_ids']
+            equipment_quantities = request.data['equipment_quantities']
+            project = Project.objects.get(id=serializer.data['id'])
             for labour_id in labour_ids:
                 labour = Labour.objects.get(id=int(labour_id))
-                labour.allocated = True
-                labour.delete()
-
-            for material, quantity in zip(material_id, material_quantity):
-                material= Material.objects.get(id=int(material))
-                material.quantity -= int(quantity)
+                ResourceUsage.objects.create(project=project, labour=labour, usage_date=date.today(),resource_type='labour')
+                # labour.delete()
+            for i in range(len(material_ids)):
+                material_id = material_ids[i]
+                material_quantity = material_quantities[i]
+                material = Material.objects.get(id=int(material_id))
+                material.quantity >= material_quantity
+                material.quantity -= int(material_quantity)
                 material.save()
-
-            for equipment, quantity in zip(equipment_id, equipment_quantity):
-                equipment= Equipment.objects.get(id=int(equipment))
-                equipment.quantity -= int(quantity)
+                ResourceUsage.objects.create(project=project, material=material, usage_quantity=int(material_quantity), usage_date=date.today(), resource_type='material')
+                 
+            for i in range(len(equipment_ids)):
+                equipment_id = equipment_ids[i]
+                equipment_quantity = equipment_quantities[i]
+                equipment = Equipment.objects.get(id=int(equipment_id))
+                equipment.quantity -= int(equipment_quantity)
                 equipment.save()
-
+                ResourceUsage.objects.create(project=project, equipment=equipment, usage_quantity=int(equipment_quantity), usage_date=date.today(), resource_type='equipment')
+             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
     def delete(self, request, pk):
         projects = Project.objects.get(pk=pk)
         projects.delete()
         return Response({"Project Deleted Succesfully"},status=status.HTTP_204_NO_CONTENT)
     def put(self, request, pk):
      project = Project.objects.get(pk=pk)
-     serializer = ProjectSerializer(project, data=request.data)
+     serializer = ProjectSerializer(data=request.data)
      if serializer.is_valid():
-        serializer.save()
-        labour_ids = request.data['labour_ids']
-        material_id = request.data['material_id']
-        material_quantity = request.data['material_quantity']
-        equipment_id = request.data['equipment_id']
-        equipment_quantity = request.data['equipment_quantity']
-
-        
-        for labour_id in labour_ids:
-            labour = Labour.objects.get(id=int(labour_id))
-            labour.allocated = True
-            labour.save()
-
-        
-        for material, quantity in zip(material_id, material_quantity):
-            material_obj = Material.objects.get(id=int(material))
-            material_obj.quantity -= int(quantity)
-            material_obj.save()
-
-        for equipment, quantity in zip(equipment_id, equipment_quantity):
-            equipment_obj = Equipment.objects.get(id=int(equipment))
-            equipment_obj.quantity -= int(quantity)
-            equipment_obj.save()
-
-        return Response(serializer.data)
+            serializer.save()
+            labour_ids = request.data['labour_ids']
+            material_ids = request.data['material_ids']
+            material_quantities = request.data['material_quantities']
+            equipment_ids = request.data['equipment_ids']
+            equipment_quantities = request.data['equipment_quantities']
+            project = Project.objects.get(id=serializer.data['id'])
+            for labour_id in labour_ids:
+                labour = Labour.objects.get(id=int(labour_id))
+                labour.allocated(True)
+                ResourceUsage.objects.create(project=project, labour=labour, usage_date=date.today(),resource_type='labour')
+                # labour.delete()
+            for i in range(len(material_ids)):
+                material_id = material_ids[i]
+                material_quantity = material_quantities[i]
+                material = Material.objects.get(id=int(material_id))
+                material.quantity -= int(material_quantity)
+                material.save()
+                ResourceUsage.objects.create(project=project, material=material, usage_quantity=int(material_quantity), usage_date=date.today(), resource_type='material')
+            for i in range(len(equipment_ids)):
+                equipment_id = equipment_ids[i]
+                equipment_quantity = equipment_quantities[i]
+                equipment = Equipment.objects.get(id=int(equipment_id))
+                equipment.quantity -= int(equipment_quantity)
+                equipment.save()
+                ResourceUsage.objects.create(project=project, equipment=equipment, usage_quantity=int(equipment_quantity), usage_date=date.today(), resource_type='equipment')
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
  
-
+class ResourceUsageView(APIView):
+    def get(self, request, project_id):
+        resource_usage = ResourceUsage.objects.filter(project_id=project_id)
+        serializer = ResourceUsageSerializer(resource_usage, many=True)
+        return Response(serializer.data)
     

@@ -9,5 +9,6 @@ urlpatterns = [
     path('equipments/<int:pk>/',EquipmentView.as_view()),
     path('materials/<int:pk>/',MaterialView.as_view()),
     path('materials/',MaterialView.as_view()),
+     path('projects/<int:project_id>/resource-usage/',ResourceUsageView.as_view()),
 
 ]

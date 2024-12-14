@@ -31,10 +31,21 @@ class Equipment(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=255)
     labour_ids = models.CharField(max_length=255)
-    material_id = models.CharField(max_length=255)
-    material_quantity = models.CharField(max_length=255)
-    equipment_id = models.CharField(max_length=255)
-    equipment_quantity = models.CharField(max_length=255)
+    material_ids = models.CharField(max_length=255)
+    material_quantities = models.CharField(max_length=255)
+    equipment_ids = models.CharField(max_length=255)
+    equipment_quantities = models.CharField(max_length=255)
 
     def __str__(self):
         return self.name
+class ResourceUsage(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    labour = models.ForeignKey(Labour, on_delete=models.CASCADE, null=True, blank=True)
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True)
+    equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE, null=True, blank=True)
+    usage_date = models.DateField()
+    usage_quantity = models.IntegerField(null=True, blank=True)
+    resource_type = models.CharField(max_length=255)
+    def __str__(self):
+        return f"{self.project.name} - {self.resource_type}"
+
