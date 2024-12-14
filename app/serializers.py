@@ -42,6 +42,20 @@ class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'name', 'labour_ids', 'material_ids', 'material_quantities', 'equipment_ids', 'equipment_quantities']
+        def get_labour_ids(self, obj):
+         return obj.labour_ids.split(',')
+
+        def get_material_ids(self, obj):
+         return obj.material_ids.split(',')
+
+        def get_material_quantities(self, obj):
+         return obj.material_quantities.split(',')
+
+        def get_equipment_ids(self, obj):
+         return obj.equipment_ids.split(',')
+
+        def get_equipment_quantities(self, obj):
+         return obj.equipment_quantities.split(',')
 
 
 class ResourceUsageSerializer(serializers.ModelSerializer):

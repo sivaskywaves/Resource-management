@@ -1,4 +1,4 @@
-
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
 from datetime import date
@@ -85,10 +85,24 @@ class MaterialView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ProjectView(APIView):
-    # def get(self, request):
-    #     projects = Project.objects.all()
-    #     serializer = ProjectSerializer(projects, many=True)
-        # return Response(serializer.data)    
+    def get(self, request):
+        projects = Project.objects.all()
+        data = []
+        for project in projects:
+            labour_ids = project.labour_ids.split(',')
+            material_ids = project.material_ids.split(',')
+            material_quantities = project.material_quantities.split(',')
+            equipment_ids = project.equipment_ids.split(',')
+            equipment_quantities = project.equipment_quantities.split(',')
+            data.append({
+                'project_name': project.name,
+                'labour_ids': labour_ids,
+                'material_ids': material_ids,
+                'material_quantities': material_quantities,
+                'equipment_ids': equipment_ids,
+                'equipment_quantities': equipment_quantities
+            })
+        return Response(data)    
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
