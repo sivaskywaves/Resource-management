@@ -221,8 +221,8 @@ class ProjectsView(APIView):
                     send_mail(
                         'Resources are less than required',
                         f'Material {material.name} is less than required for project {project.name}',
-                        'sambasankar19@gmail.com',#ours mail
-                        ['sivagsankar2596@gmail.com'],#admin
+                        'your mail@gmail.com',#ours mail
+                        ['admin@gmail.com'],#admin
                         fail_silently=False,
                     )
                     return Response({'message': f'Resources are less than required for project {project.name}'}, status=status.HTTP_200_OK)
@@ -240,8 +240,8 @@ class ProjectsView(APIView):
                     send_mail(
                         'Resources are less than required',
                         f'Equipment {equipment.name} is less than required for project {project.name}',
-                        'sambasankar19@gmail.com',#ours mail
-                        ['sivagsankar2596@gmail.com'],#admin
+                        'your mail',#ours mail
+                        ['admin@gmail.com'],#admin
                         
                         fail_silently=False,
                     )
