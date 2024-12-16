@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.response import Response
+from django.core.mail import send_mail
 from datetime import date
 from rest_framework.views import APIView
 from .models import Project, Labour, Material, Equipment,ResourceUsage
@@ -211,22 +212,44 @@ class ProjectsView(APIView):
             for labour_id in labour_ids:
                 labour = Labour.objects.get(id=int(labour_id))
                 ResourceUsage.objects.create(project=project, labour=labour, usage_date=date.today(),resource_type='labour')
-                labour.delete()
+                # labour.delete()
             for i in range(len(material_ids)):
                 material_id = material_ids[i]
                 material_quantity = material_quantities[i]
                 material = Material.objects.get(id=int(material_id))
-                material.quantity -= int(material_quantity)
-                material.save()
-                ResourceUsage.objects.create(project=project, material=material, usage_quantity=int(material_quantity), usage_date=date.today(), resource_type='material')
+                if material.quantity < int(material_quantity):
+                    send_mail(
+                        'Resources are less than required',
+                        f'Material {material.name} is less than required for project {project.name}',
+                        'sambasankar19@gmail.com',#ours mail
+                        ['sivagsankar2596@gmail.com'],#admin
+                        fail_silently=False,
+                    )
+                    return Response({'message': f'Resources are less than required for project {project.name}'}, status=status.HTTP_200_OK)
+                else:
+                   material.quantity -= int(material_quantity)
+                   material.save()
+                   ResourceUsage.objects.create(project=project, material=material, usage_quantity=int(material_quantity), usage_date=date.today(), resource_type='material')
                  
             for i in range(len(equipment_ids)):
                 equipment_id = equipment_ids[i]
                 equipment_quantity = equipment_quantities[i]
                 equipment = Equipment.objects.get(id=int(equipment_id))
-                equipment.quantity -= int(equipment_quantity)
-                equipment.save()
-                ResourceUsage.objects.create(project=project, equipment=equipment, usage_quantity=int(equipment_quantity), usage_date=date.today(), resource_type='equipment')
+                if equipment.quantity < int(equipment_quantity):
+                    
+                    send_mail(
+                        'Resources are less than required',
+                        f'Equipment {equipment.name} is less than required for project {project.name}',
+                        'sambasankar19@gmail.com',#ours mail
+                        ['sivagsankar2596@gmail.com'],#admin
+                        
+                        fail_silently=False,
+                    )
+                    return Response({'message': f'Resources are less than required for project {project.name}'}, status=status.HTTP_200_OK)
+                else:
+                  equipment.quantity -= int(equipment_quantity)
+                  equipment.save()
+                  ResourceUsage.objects.create(project=project, equipment=equipment, usage_quantity=int(equipment_quantity), usage_date=date.today(), resource_type='equipment')
              
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
